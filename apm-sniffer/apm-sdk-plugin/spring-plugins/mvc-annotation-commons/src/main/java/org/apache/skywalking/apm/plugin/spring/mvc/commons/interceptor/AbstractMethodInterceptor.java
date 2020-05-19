@@ -110,17 +110,20 @@ public abstract class AbstractMethodInterceptor implements InstanceMethodsAround
                 String userId = request.getAttribute("sessionUserId") == null ? "" : request.getAttribute("sessionUserId").toString();
                 //add operationName by url
                 if (operationName == null || operationName.length() == 0) {
-                    String letterUserId = "";
-                    for (char letter : userId.toCharArray()) {
-                        try {
-                            letterUserId = letterUserId + LETTERS[Integer.parseInt(String.valueOf(letter))];
-                        } catch (Exception e) {
+                    if (userId != null && userId.length() != 0) {
+                        String letterUserId = "";
+                        for (char letter : userId.toCharArray()) {
+                            try {
+                                letterUserId = letterUserId + LETTERS[Integer.parseInt(String.valueOf(letter))];
+                            } catch (Exception e) {
 
+                            }
                         }
+                        operationName = String.join("/", request.getRequestURI(), "u" + letterUserId + "u");
+                    } else {
+                        operationName = request.getRequestURI();
                     }
-                    operationName = String.join("/", request.getRequestURI(), "u" + letterUserId + "u");
                 }
-
                 AbstractSpan span = ContextManager.createEntrySpan(operationName, contextCarrier);
                 Tags.URL.set(span, request.getRequestURL().toString());
 
